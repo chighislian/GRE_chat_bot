@@ -1,0 +1,24 @@
+User
+  │
+  ▼
+Frontend (Web or Android App)
+  │
+  ▼
+Chatbot Backend (Python)
+  │
+  ├── Intent Detection
+  ├── Response Generator
+  ├── Quiz Engine
+  └── Vocabulary Manager
+  │
+  ▼
+Knowledge Base
+  ├── GRE Words
+  ├── Definitions
+  ├── Synonyms
+  ├── Antonyms
+  └── Example Sentences
+
+
+Component:
+P
