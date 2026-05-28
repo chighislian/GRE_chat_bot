@@ -25,11 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 ${data.definition}<br>
                 <em>${data.part_of_speech}</em><br>
                 Example: ${data.example}
+                ${data.synonyms !== "Not available" ? `<br>Synonyms: ${data.synonyms}` : ""}
+                ${data.antonyms !== "Not available" ? `<br>Antonyms: ${data.antonyms}` : ""}
             </div>
         `;
-
-        // Auto scroll to latest message
-        chatBox.scrollTop = chatBox.scrollHeight;
 
         input.value = "";
     });
