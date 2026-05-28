@@ -28,6 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
+        // Auto scroll to latest message
+        chatBox.scrollTop = chatBox.scrollHeight;
+
         input.value = "";
     });
 
