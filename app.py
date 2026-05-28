@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
+import random
 
 app = Flask(__name__)
 
@@ -37,5 +38,35 @@ def get_word():
         "antonyms": ""
     })
 
+
+
+@app.route("/quiz-question", methods=["GET"])
+def quiz_question():
+    random_row = df.sample().iloc[0]
+    return jsonify({
+        "definition": random_row["definition"],
+        "word_id": random_row["word"].lower()
+    })
+
+@app.route("/check-answer", methods=["POST"])
+def check_answer():
+
+    data = request.json
+
+    user_answer = data["answer"].lower()
+
+    correct_answer = data["correct"].lower()
+
+    if user_answer.strip().lower()== correct_answer.strip().lower():
+
+        return jsonify({"result": "correct"})
+
+    else:
+
+        return jsonify({"result": "wrong", "correct": correct_answer})
+
+
 if __name__ == "__main__":
     app.run(debug=True)
+
+
