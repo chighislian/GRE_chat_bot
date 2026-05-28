@@ -8,7 +8,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const chatBox = document.getElementById("chat-box");
 
+    // ===== SCORE VARIABLES =====
+
     let currentAnswer = "";
+
+    let score = 0;
+
+    let totalQuestions = 0;
+
+    let streak = 0;
+
+    // ===== SCORE BOARD =====
+
+    const scoreBoard = document.createElement("div");
+
+    scoreBoard.id = "score-board";
+
+    scoreBoard.innerHTML = `
+
+        <h3>Score: 0/0 | Streak: 0</h3>
+
+    `;
+
+    chatBox.parentNode.insertBefore(scoreBoard, chatBox);
 
     // ===== ASK WORD =====
 
@@ -25,11 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: {
 
                 "Content-Type": "application/json"
-
             },
 
             body: JSON.stringify({ word: word })
-
         });
 
         const data = await response.json();
@@ -41,39 +61,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 <h2>${data.word}</h2>
 
                 <p>
-
                     <strong>Definition:</strong><br>
-
                     ${data.definition}
-
                 </p>
-
                 <p>
-
                     <strong>Part of Speech:</strong><br>
-
                     ${data.part_of_speech}
-
                 </p>
-
                 <p>
-
                     <strong>Example:</strong><br>
-
                     ${data.example}
-
                 </p>
-
                 <p>
-
                     <strong>Synonyms:</strong><br>
-
                     ${data.synonyms || "Not available"}
-
                 </p>
-
                 <p>
-
                     <strong>Antonyms:</strong><br>
 
                     ${data.antonyms || "Not available"}
@@ -96,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         quizButton.addEventListener("click", async () => {
 
-            // 🧹 REMOVE OLD QUIZ (important fix)
+            // REMOVE OLD QUIZ
 
             const oldQuiz = document.getElementById("quiz-block");
 
@@ -112,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <div class="bot-message" id="quiz-block">
 
-                    <h2>Quiz Time </h2>
+                    <h2>Quiz Time</h2>
 
                     <p>
 
@@ -132,8 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // wait for DOM update
-
             setTimeout(() => {
 
                 const submitBtn = document.getElementById("submit-answer");
@@ -150,6 +151,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         .trim();
 
+                    if (userAnswer === "") return;
+
                     const res = await fetch("/check-answer", {
 
                         method: "POST",
@@ -161,16 +164,45 @@ document.addEventListener("DOMContentLoaded", () => {
                         },
 
                         body: JSON.stringify({
-
                             answer: userAnswer,
-
-                            correct: currentAnswer
-
+                            correct: currentAnswer,
+                            score: score,
+                            total: totalQuestions,
+                            streak: streak
                         })
-
                     });
 
                     const result = await res.json();
+
+                    // ===== UPDATE SCORE =====
+
+                    totalQuestions++;
+
+                    if (result.result === "correct") {
+
+                        score++;
+
+                        streak++;
+
+                    } else {
+
+                        streak = 0;
+
+                    }
+
+                    scoreBoard.innerHTML = `
+
+                        <h3>
+
+                            Score: ${score}/${totalQuestions}
+
+                            | Streak: ${streak} 
+
+                        </h3>
+
+                    `;
+
+                    // ===== SHOW RESULT =====
 
                     chatBox.innerHTML += `
 

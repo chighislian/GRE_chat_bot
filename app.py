@@ -1,10 +1,19 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import random
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
 df = pd.read_csv("data/gre_words_updated.csv")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///gre.db"
+db = SQLAlchemy(app)
+class QuizScore(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    correct = db.Column(db.Integer)
+    total = db.Column(db.Integer)
+    streak = db.Column(db.Integer)
 
 @app.route("/")
 def home():
@@ -38,8 +47,6 @@ def get_word():
         "antonyms": ""
     })
 
-
-
 @app.route("/quiz-question", methods=["GET"])
 def quiz_question():
     random_row = df.sample().iloc[0]
@@ -57,14 +64,49 @@ def check_answer():
 
     correct_answer = data["correct"].lower()
 
-    if user_answer.strip().lower()== correct_answer.strip().lower():
+    current_score = data.get("score", 0)
+
+    current_total = data.get("total", 0)
+
+    current_streak = data.get("streak", 0)
+
+    if user_answer.strip().lower() == correct_answer.strip().lower():
+
+        result = "correct"
+
+    else:
+
+        result = "wrong"
+
+    # SAVE TO DATABASE
+
+    quiz_score = QuizScore(
+
+        correct=current_score,
+
+        total=current_total,
+
+        streak=current_streak
+    )
+
+    db.session.add(quiz_score)
+
+    db.session.commit()
+
+    if result == "correct":
 
         return jsonify({"result": "correct"})
 
     else:
 
-        return jsonify({"result": "wrong", "correct": correct_answer})
+        return jsonify({
+            "result": "wrong",
+            "correct": correct_answer
+        })
 
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     app.run(debug=True)
