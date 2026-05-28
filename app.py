@@ -55,6 +55,9 @@ def quiz_question():
         "word_id": random_row["word"].lower()
     })
 
+
+
+
 @app.route("/check-answer", methods=["POST"])
 def check_answer():
 
@@ -104,6 +107,39 @@ def check_answer():
             "correct": correct_answer
         })
 
+
+@app.route("/stats", methods=["GET"])
+
+def stats():
+
+    scores = QuizScore.query.all()
+
+    total_attempts = len(scores)
+
+    if total_attempts == 0:
+
+        return jsonify({
+            "total_attempts": 0,
+            "total_correct": 0,
+            "best_streak": 0,
+            "average_score": 0
+        })
+    total_correct = sum(score.correct for score in scores)
+
+    best_streak = max(score.streak for score in scores)
+
+    average_score = round(total_correct / total_attempts, 2)
+
+    return jsonify({
+
+        "total_attempts": total_attempts,
+
+        "total_correct": total_correct,
+
+        "best_streak": best_streak,
+
+        "average_score": average_score
+    })
 
 with app.app_context():
     db.create_all()

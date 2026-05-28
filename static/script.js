@@ -1,8 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const askButton = document.querySelector("button");
+    const askButton = document.getElementById("ask-btn");
 
     const quizButton = document.getElementById("quiz-btn");
+
+    const statsButton = document.getElementById("stats-btn");
 
     const input = document.getElementById("word-input");
 
@@ -47,9 +49,11 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: {
 
                 "Content-Type": "application/json"
+
             },
 
             body: JSON.stringify({ word: word })
+
         });
 
         const data = await response.json();
@@ -61,22 +65,39 @@ document.addEventListener("DOMContentLoaded", () => {
                 <h2>${data.word}</h2>
 
                 <p>
+
                     <strong>Definition:</strong><br>
+
                     ${data.definition}
+
                 </p>
+
                 <p>
+
                     <strong>Part of Speech:</strong><br>
+
                     ${data.part_of_speech}
+
                 </p>
+
                 <p>
+
                     <strong>Example:</strong><br>
+
                     ${data.example}
+
                 </p>
+
                 <p>
+
                     <strong>Synonyms:</strong><br>
+
                     ${data.synonyms || "Not available"}
+
                 </p>
+
                 <p>
+
                     <strong>Antonyms:</strong><br>
 
                     ${data.antonyms || "Not available"}
@@ -164,12 +185,19 @@ document.addEventListener("DOMContentLoaded", () => {
                         },
 
                         body: JSON.stringify({
+
                             answer: userAnswer,
+
                             correct: currentAnswer,
+
                             score: score,
+
                             total: totalQuestions,
+
                             streak: streak
+
                         })
+
                     });
 
                     const result = await res.json();
@@ -190,13 +218,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     }
 
+                    // ===== UPDATE SCOREBOARD =====
+
                     scoreBoard.innerHTML = `
 
                         <h3>
 
                             Score: ${score}/${totalQuestions}
 
-                            | Streak: ${streak} 
+                            | Streak: ${streak}
 
                         </h3>
 
@@ -227,6 +257,59 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
 
             }, 50);
+
+        });
+
+    }
+
+    // ===== VIEW STATS =====
+
+    if (statsButton) {
+
+        statsButton.addEventListener("click", async () => {
+
+            const response = await fetch("/stats");
+
+            const data = await response.json();
+
+            chatBox.innerHTML += `
+
+                <div class="bot-message">
+
+                    <h2>📊 Performance Overview</h2>
+
+                    <p>
+
+                        <strong>Total Quiz Attempts:</strong><br>
+
+                        ${data.total_attempts}
+
+                    </p>
+
+                    <p>
+
+                        <strong>Total Correct Answers:</strong><br>
+
+                        ${data.total_correct}
+                    </p>
+                    <p>
+                        <strong>Best Streak:</strong><br>
+                        ${data.best_streak}
+                    </p>
+
+                    <p>
+
+                        <strong>Average Score:</strong><br>
+
+                        ${data.average_score}
+
+                    </p>
+
+                </div>
+
+            `;
+
+            chatBox.scrollTop = chatBox.scrollHeight;
 
         });
 
