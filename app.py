@@ -55,9 +55,6 @@ def quiz_question():
         "word_id": random_row["word"].lower()
     })
 
-
-
-
 @app.route("/check-answer", methods=["POST"])
 def check_answer():
 
