@@ -6,11 +6,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const statsButton = document.getElementById("stats-btn");
 
+    const weakButton = document.getElementById("weak-btn");
+
     const input = document.getElementById("word-input");
 
     const chatBox = document.getElementById("chat-box");
 
-    // ===== SCORE VARIABLES =====
+    // ===== STATE =====
 
     let currentAnswer = "";
 
@@ -20,21 +22,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let streak = 0;
 
-    // ===== SCORE BOARD =====
+    // ===== SCOREBOARD =====
 
     const scoreBoard = document.createElement("div");
 
     scoreBoard.id = "score-board";
 
-    scoreBoard.innerHTML = `
-
-        <h3>Score: 0/0 | Streak: 0</h3>
-
-    `;
+    scoreBoard.innerHTML = `<h3>Score: 0/0 | Streak: 0</h3>`;
 
     chatBox.parentNode.insertBefore(scoreBoard, chatBox);
 
-    // ===== ASK WORD =====
+    // =========================
+
+    // ASK WORD MODE
+
+    // =========================
 
     askButton.addEventListener("click", async () => {
 
@@ -46,11 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             method: "POST",
 
-            headers: {
-
-                "Content-Type": "application/json"
-
-            },
+            headers: { "Content-Type": "application/json" },
 
             body: JSON.stringify({ word: word })
 
@@ -64,45 +62,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <h2>${data.word}</h2>
 
-                <p>
+                <p><strong>Definition:</strong><br>${data.definition}</p>
 
-                    <strong>Definition:</strong><br>
+                <p><strong>Part of Speech:</strong><br>${data.part_of_speech}</p>
 
-                    ${data.definition}
+                <p><strong>Example:</strong><br>${data.example}</p>
 
-                </p>
+                <p><strong>Synonyms:</strong><br>${data.synonyms || "Not available"}</p>
 
-                <p>
-
-                    <strong>Part of Speech:</strong><br>
-
-                    ${data.part_of_speech}
-
-                </p>
-
-                <p>
-
-                    <strong>Example:</strong><br>
-
-                    ${data.example}
-
-                </p>
-
-                <p>
-
-                    <strong>Synonyms:</strong><br>
-
-                    ${data.synonyms || "Not available"}
-
-                </p>
-
-                <p>
-
-                    <strong>Antonyms:</strong><br>
-
-                    ${data.antonyms || "Not available"}
-
-                </p>
+                <p><strong>Antonyms:</strong><br>${data.antonyms || "Not available"}</p>
 
             </div>
 
@@ -114,13 +82,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
-    // ===== QUIZ MODE =====
+    // =========================
+
+    // QUIZ MODE
+
+    // =========================
 
     if (quizButton) {
 
         quizButton.addEventListener("click", async () => {
-
-            // REMOVE OLD QUIZ
 
             const oldQuiz = document.getElementById("quiz-block");
 
@@ -138,13 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     <h2>Quiz Time</h2>
 
-                    <p>
-
-                        <strong>Definition:</strong><br>
-
-                        ${data.definition}
-
-                    </p>
+                    <p><strong>Definition:</strong><br>${data.definition}</p>
 
                     <input id="quiz-input" placeholder="Type the word..." />
 
@@ -178,11 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         method: "POST",
 
-                        headers: {
-
-                            "Content-Type": "application/json"
-
-                        },
+                        headers: { "Content-Type": "application/json" },
 
                         body: JSON.stringify({
 
@@ -202,8 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const result = await res.json();
 
-                    // ===== UPDATE SCORE =====
-
                     totalQuestions++;
 
                     if (result.result === "correct") {
@@ -218,35 +176,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     }
 
-                    // ===== UPDATE SCOREBOARD =====
-
                     scoreBoard.innerHTML = `
 
-                        <h3>
-
-                            Score: ${score}/${totalQuestions}
-
-                            | Streak: ${streak}
-
-                        </h3>
+                        <h3>Score: ${score}/${totalQuestions} | Streak: ${streak}</h3>
 
                     `;
-
-                    // ===== SHOW RESULT =====
 
                     chatBox.innerHTML += `
 
                         <div class="bot-message">
 
-                            ${
+                            ${result.result === "correct"
 
-                                result.result === "correct"
+                            ? "Correct ✅"
 
-                                    ? "Correct ✅"
-
-                                    : "Wrong ❌ Correct answer: " + result.correct
-
-                            }
+                            : "Wrong ❌ Correct answer: " + result.correct}
 
                         </div>
 
@@ -262,7 +206,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    // ===== VIEW STATS =====
+    // =========================
+
+    // STATS MODE
+
+    // =========================
 
     if (statsButton) {
 
@@ -278,32 +226,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     <h2>📊 Performance Overview</h2>
 
-                    <p>
+                    <p><strong>Total Quiz Attempts:</strong><br>${data.total_attempts}</p>
 
-                        <strong>Total Quiz Attempts:</strong><br>
+                    <p><strong>Total Correct Answers:</strong><br>${data.total_correct}</p>
 
-                        ${data.total_attempts}
+                    <p><strong>Best Streak:</strong><br>${data.best_streak}</p>
 
-                    </p>
-
-                    <p>
-
-                        <strong>Total Correct Answers:</strong><br>
-
-                        ${data.total_correct}
-                    </p>
-                    <p>
-                        <strong>Best Streak:</strong><br>
-                        ${data.best_streak}
-                    </p>
-
-                    <p>
-
-                        <strong>Average Score:</strong><br>
-
-                        ${data.average_score}
-
-                    </p>
+                    <p><strong>Average Score:</strong><br>${data.average_score}</p>
 
                 </div>
 
@@ -314,5 +243,133 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
     }
+
+    // =========================
+
+    // WEAK WORD PRACTICE MODE
+
+    // =========================
+
+
+
+
+
+    if (weakButton) {
+
+        weakButton.addEventListener("click", async () => {
+
+            // REMOVE OLD QUIZ FIRST (important fix)
+
+            const oldQuiz = document.getElementById("quiz-block");
+
+            if (oldQuiz) oldQuiz.remove();
+
+            const response = await fetch("/weak-quiz");
+
+            const data = await response.json();
+
+            currentAnswer = data.word_id;
+
+            chatBox.innerHTML += `
+
+            <div class="bot-message" id="quiz-block">
+
+                <h2>Weak Word Practice</h2>
+
+                <p><strong>Definition:</strong><br>${data.definition}</p>
+
+                <input id="quiz-input" placeholder="Type the word..." />
+
+                <button id="submit-answer">Submit</button>
+
+            </div>
+
+        `;
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            setTimeout(() => {
+
+                const submitBtn = document.getElementById("submit-answer");
+
+                if (!submitBtn) return;
+
+                // IMPORTANT: remove old listener before adding new one
+
+                submitBtn.onclick = null;
+
+                submitBtn.onclick = async () => {
+
+                    const userAnswer = document
+
+                        .getElementById("quiz-input")
+
+                        .value
+
+                        .trim();
+
+                    if (userAnswer === "") return;
+
+                    const res = await fetch("/check-answer", {
+
+                        method: "POST",
+
+                        headers: { "Content-Type": "application/json" },
+
+                        body: JSON.stringify({
+
+                            answer: userAnswer,
+
+                            correct: currentAnswer,
+
+                            score: score,
+
+                            total: totalQuestions,
+
+                            streak: streak
+
+                        })
+                    });
+
+                    const result = await res.json();
+
+                    totalQuestions++;
+
+                    if (result.result === "correct") {
+
+                        score++;
+
+                        streak++;
+
+                    } else {
+
+                        streak = 0;
+
+                    }
+
+                    scoreBoard.innerHTML = `
+
+                    <h3>Score: ${score}/${totalQuestions} | Streak: ${streak}</h3>
+
+                `;
+
+                    chatBox.innerHTML += `
+
+                    <div class="bot-message">
+
+                        ${result.result === "correct"
+
+                            ? "Correct ✅"
+
+                            : "Wrong ❌ Correct answer: " + result.correct}
+                    </div>
+                `;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                };
+            }, 50);
+
+        });
+    }
+
 
 });
