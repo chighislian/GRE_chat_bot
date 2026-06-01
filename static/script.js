@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const weakButton = document.getElementById("weak-btn");
 
+    const semanticButton = document.getElementById("semantic-btn");
+
     const input = document.getElementById("word-input");
 
     const chatBox = document.getElementById("chat-box");
@@ -250,10 +252,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // =========================
 
-
-
-
-
     if (weakButton) {
 
         weakButton.addEventListener("click", async () => {
@@ -370,6 +368,86 @@ document.addEventListener("DOMContentLoaded", () => {
 
         });
     }
+          
+        // =========================
+  // SEMANTIC SEARCH MODE
+// =========================
+
+  if (semanticButton) {
+
+    semanticButton.addEventListener("click", async () => {
+
+        const query = input.value.trim();
+
+        if (query === "") {
+
+            alert("Enter a word, meaning, or concept first");
+
+            return;
+
+        }
+
+        const response = await fetch("/semantic-search", {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+                query: query
+
+            })
+
+        });
+
+        const data = await response.json();
+
+        chatBox.innerHTML += `
+
+            <div class="bot-message">
+
+                <h2>🔎 Semantic Search Result</h2>
+
+                <p>
+
+                    <strong>Closest Word:</strong><br>
+
+                    ${data.word}
+
+                </p>
+
+                <p>
+
+                    <strong>Definition:</strong><br>
+
+                    ${data.definition}
+
+                </p>
+
+                <p>
+
+                    <strong>Similarity Score:</strong><br>
+
+                    ${data.similarity}
+
+                </p>
+
+            </div>
+
+        `;
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        input.value = "";
+
+    });
+
+   }
 
 
 });

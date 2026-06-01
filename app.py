@@ -57,31 +57,73 @@ def home():
     return render_template("index.html")
 
 # ---------- WORD LOOKUP ----------
+
+
 @app.route("/get_word", methods=["POST"])
 def get_word():
+
     word = request.json["word"].strip().lower()
 
+    # =========================
+    # EXACT MATCH
+    # =========================
     result = df[df["word"] == word]
 
     if not result.empty:
+
         row = result.iloc[0]
+
         return jsonify({
             "word": row["word"],
             "definition": row["definition"],
             "part_of_speech": row["part_of_speech"],
             "example": row["example"],
             "synonyms": row["synonyms"],
-            "antonyms": row["antonyms"]
+            "antonyms": row["antonyms"],
+            "semantic": False
         })
 
+    # =========================
+    # SEMANTIC SEARCH FALLBACK
+    # =========================
+    query_vec = vectorizer.transform([word])
+
+    similarities = cosine_similarity(query_vec, tfidf_matrix)
+
+    best_index = similarities.argmax()
+
+    best_score = float(similarities[0][best_index])
+
+    # Prevent meaningless matches
+    if best_score < 0.10:
+
+        return jsonify({
+            "word": word,
+            "definition": "No similar GRE word found.",
+            "part_of_speech": "",
+            "example": "",
+            "synonyms": "Not available",
+            "antonyms": "Not available",
+            "semantic": False
+        })
+
+    row = df.iloc[best_index]
+
     return jsonify({
-        "word": word,
-        "definition": "Word not found.",
-        "part_of_speech": "",
-        "example": "",
-        "synonyms": "Not available",
-        "antonyms": "Not available"
+        "word": row["word"],
+        "definition": row["definition"],
+        "part_of_speech": row["part_of_speech"],
+        "example": row["example"],
+        "synonyms": row["synonyms"],
+        "antonyms": row["antonyms"],
+        "semantic": True,
+        "similarity": round(best_score, 3)
     })
+
+
+
+
+
 
 # ---------- QUIZ ----------
 @app.route("/quiz-question", methods=["GET"])
