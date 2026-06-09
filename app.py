@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
+from sentence_transformers import SentenceTransformer 
 app = Flask(__name__)
 
 # =========================
@@ -20,10 +19,13 @@ df["antonyms"] = df["antonyms"].fillna("Not available")
 # =========================
 # SEMANTIC SEARCH SETUP
 # =========================
-df["combined"] = df["word"] + " " + df["definition"] + " " + df["synonyms"]
+df["combined"] = (df["word"].fillna("") + " " + df["definition"].fillna("") + " " + df["synonyms"].fillna("") + " " + df["synonyms"].fillna("") + " "+ df["example"].fillna(""))
+model = SentenceTransformer("all-MiniLM-L6-v2")
+word_embeddings = model.encode(
 
-vectorizer = TfidfVectorizer(stop_words="english")
-tfidf_matrix = vectorizer.fit_transform(df["combined"])
+    df["combined"].tolist()
+
+)
 
 # =========================
 # DATABASE
@@ -86,16 +88,16 @@ def get_word():
     # =========================
     # SEMANTIC SEARCH FALLBACK
     # =========================
-    query_vec = vectorizer.transform([word])
+    query_embedding = model.encode([word])
 
-    similarities = cosine_similarity(query_vec, tfidf_matrix)
+    similarities = cosine_similarity(query_embedding,word_embeddings)
 
     best_index = similarities.argmax()
 
     best_score = float(similarities[0][best_index])
 
     # Prevent meaningless matches
-    if best_score < 0.10:
+    if best_score < 0.55:
 
         return jsonify({
             "word": word,
@@ -215,11 +217,21 @@ def semantic_search():
     data = request.json
     query = data["query"].lower()
 
-    query_vec = vectorizer.transform([query])
-    similarities = cosine_similarity(query_vec, tfidf_matrix)
+    query_embedding = model.encode([query])
+    similarities = cosine_similarity(query_embedding,word_embeddings)
 
     best_index = similarities.argmax()
     best_score = float(similarities[0][best_index])
+
+
+
+    if best_score < 0.55:
+
+        return jsonify({
+            "word": "No Match",
+            "definition": "No sufficiently similar GRE word found.",
+            "similarity": round(best_score, 3)
+        })
 
     result = df.iloc[best_index]
 
@@ -229,13 +241,18 @@ def semantic_search():
         "similarity": round(best_score, 3)
     })
 
+
+
+
+
+
 # ---------- DEBUG ----------
 @app.route("/debug-search")
 def debug_search():
     query = "bravery"
 
-    query_vec = vectorizer.transform([query])
-    similarities = cosine_similarity(query_vec, tfidf_matrix)
+    query_embedding = model.encode([query])
+    similarities = cosine_similarity(query_embedding,word_embeddings)
 
     best_index = similarities.argmax()
 
@@ -274,6 +291,8 @@ def weak_quiz():
         "definition": word["definition"],
         "word_id": word["word"]
     })
+
+    
 
 # =========================
 if __name__ == "__main__":
