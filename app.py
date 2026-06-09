@@ -215,7 +215,7 @@ def stats():
 @app.route("/semantic-search", methods=["POST"])
 def semantic_search():
     data = request.json
-    query = data["query"].lower()
+    query = data["query"].strip().lower()
 
     query_embedding = model.encode([query])
     similarities = cosine_similarity(query_embedding,word_embeddings)
@@ -225,12 +225,13 @@ def semantic_search():
 
 
 
-    if best_score < 0.40:
+    if best_score < 0.55:
 
         return jsonify({
             "word": "No Match",
             "definition": "No sufficiently similar GRE word found.",
-            "similarity": round(best_score, 3)
+            "similarity": round(best_score, 3),
+            "confidence": "Low"
         })
 
     result = df.iloc[best_index]

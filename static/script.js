@@ -407,6 +407,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const data = await response.json();
 
+
+        let confidenceColor = "red";
+
+        if (data.confidence === "High") {
+
+            confidenceColor = "green";
+
+        }
+
+        else if (data.confidence === "Medium") {
+
+            confidenceColor = "orange";
+
+}
+
+        
+
+
         chatBox.innerHTML += `
 
             <div class="bot-message">
@@ -438,7 +456,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 </p>
                 <p>
                     <strong>Confidence:</strong><br>
+                    <span style="color:${confidenceColor}">
                     ${data.confidence}
+
+                    </span>
 
                 </p>
 
