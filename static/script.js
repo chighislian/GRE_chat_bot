@@ -436,6 +436,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${data.similarity}
 
                 </p>
+                <p>
+                    <strong>Confidence:</strong><br>
+                    ${data.confidence}
+
+                </p>
 
             </div>
 
