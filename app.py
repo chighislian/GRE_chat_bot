@@ -19,7 +19,7 @@ df["antonyms"] = df["antonyms"].fillna("Not available")
 # =========================
 # SEMANTIC SEARCH SETUP
 # =========================
-df["combined"] = (df["word"].fillna("") + " " + df["definition"].fillna("") + " " + df["synonyms"].fillna("") + " " + df["synonyms"].fillna("") + " "+ df["example"].fillna(""))
+df["combined"] = (df["word"].fillna("") + " " + df["definition"].fillna("") + " " + df["synonyms"].fillna("") + " " + df["antonyms"].fillna("") + " "+ df["example"].fillna(""))
 model = SentenceTransformer("all-MiniLM-L6-v2")
 word_embeddings = model.encode(
 
@@ -97,7 +97,7 @@ def get_word():
     best_score = float(similarities[0][best_index])
 
     # Prevent meaningless matches
-    if best_score < 0.55:
+    if best_score < 0.40:
 
         return jsonify({
             "word": word,
@@ -225,7 +225,7 @@ def semantic_search():
 
 
 
-    if best_score < 0.55:
+    if best_score < 0.40:
 
         return jsonify({
             "word": "No Match",
@@ -234,12 +234,36 @@ def semantic_search():
         })
 
     result = df.iloc[best_index]
-
+    
+    # started here 
+    if best_score < 0.70:
+        confidence = "High"
+    elif best_score >= 0.50:
+        confidence = "Medium"
+    else:
+        confidence = "Low"
+      #end here 
+    
+    
     return jsonify({
         "word": result["word"],
         "definition": result["definition"],
-        "similarity": round(best_score, 3)
-    })
+        "similarity": round(best_score, 3),
+        "confidence": confidence
+    }) 
+
+    
+    
+
+
+
+
+
+
+
+
+
+
 
 
 
