@@ -236,7 +236,7 @@ def semantic_search():
     result = df.iloc[best_index]
     
     # started here 
-    if best_score < 0.70:
+    if best_score >= 0.70:
         confidence = "High"
     elif best_score >= 0.50:
         confidence = "Medium"
