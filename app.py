@@ -225,7 +225,7 @@ def semantic_search():
 
 
 
-    if best_score < 0.55:
+    if best_score < 0.45:
 
         return jsonify({
             "word": "No Match",
@@ -239,7 +239,7 @@ def semantic_search():
     # started here 
     if best_score >= 0.70:
         confidence = "High"
-    elif best_score >= 0.50:
+    elif best_score >= 0.55:
         confidence = "Medium"
     else:
         confidence = "Low"
@@ -254,21 +254,6 @@ def semantic_search():
     }) 
 
     
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # ---------- DEBUG ----------
